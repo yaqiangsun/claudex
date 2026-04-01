@@ -217,6 +217,7 @@ class AppState:
 
 # Global state instance
 _app_state: AppState = AppState()
+_session_id: str = ''
 
 
 def get_app_state() -> AppState:
@@ -234,3 +235,18 @@ def update_app_state(updater: callable) -> None:
     """Update app state with a function."""
     global _app_state
     _app_state = updater(_app_state)
+
+
+def get_session_id() -> str:
+    """Get the current session ID."""
+    global _session_id
+    if not _session_id:
+        import uuid
+        _session_id = str(uuid.uuid4())
+    return _session_id
+
+
+def set_session_id(session_id: str) -> None:
+    """Set the session ID."""
+    global _session_id
+    _session_id = session_id

@@ -3,7 +3,7 @@ Branded types for session and agent IDs.
 These prevent accidentally mixing up session IDs and agent IDs at runtime.
 """
 
-from typing import NewType
+from typing import NewType, Optional, Pattern
 
 # SessionId: uniquely identifies a Claude Code session
 SessionId = NewType('SessionId', str)
@@ -22,7 +22,7 @@ def as_agent_id(id: str) -> AgentId:
     return AgentId(id)
 
 
-AGENT_ID_PATTERN = r'^a(?:.+-)?[0-9a-f]{16}$'
+AGENT_ID_PATTERN: Pattern = r'^a(?:.+-)?[0-9a-f]{16}$'
 
 
 def to_agent_id(s: str) -> Optional[AgentId]:

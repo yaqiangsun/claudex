@@ -10,7 +10,7 @@ from .bootstrap import initialize_state, is_initialized, get_cwd
 from .query_engine import QueryEngine, QueryEngineConfig
 from .state import AppState, get_app_state, set_app_state
 from .tool import Tool, ToolDefinition, ToolType, ToolResult
-from .commands import Command, register_command, get_command, get_all_commands
+from .commands import AVAILABLE_COMMANDS, COMMANDS
 
 __all__ = [
     '__version__',
@@ -26,8 +26,6 @@ __all__ = [
     'ToolDefinition',
     'ToolType',
     'ToolResult',
-    'Command',
-    'register_command',
-    'get_command',
-    'get_all_commands',
+    'AVAILABLE_COMMANDS',
+    'COMMANDS',
 ]
