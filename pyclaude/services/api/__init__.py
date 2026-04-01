@@ -12,7 +12,7 @@ DEFAULT_MODEL = 'claude-sonnet-4-20250514'
 
 async def call_anthropic_api(
     messages: list[dict],
-    tools: list[Any] | None = None,
+    tools: Optional[list[Any]] = None,
     thinking_config: Optional[dict] = None,
     json_schema: Optional[dict] = None,
     model: Optional[str] = None,

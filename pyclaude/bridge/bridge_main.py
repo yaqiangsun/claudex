@@ -29,17 +29,17 @@ class BridgeMain:
     # State
     _state: BridgeState = BridgeState.DISABLED
     _repl_bridge: Optional[REPLBridge] = None
-    _sessions: dict[str, SessionInfo] = {}
+    _sessions: dict[str, SessionInfo] = field(default_factory=dict)
     _current_session: Optional[SessionInfo] = None
 
     # Callbacks
-    _on_state_change: Callable[[BridgeState], None] | None = None
-    _on_message: Callable[[BridgeMessage], None] | None = None
-    _on_event: Callable[[BridgeEvent], None] | None = None
+    _on_state_change: Optional[Callable[[BridgeState], None]] = None
+    _on_message: Optional[Callable[[BridgeMessage], None]] = None
+    _on_event: Optional[Callable[[BridgeEvent], None]] = None
 
     # App state access
-    _get_app_state: Callable[[], Any] | None = None
-    _set_app_state: Callable[[Callable], None] | None = None
+    _get_app_state: Optional[Callable[[], Any]] = None
+    _set_app_state: Optional[Callable[[Callable], None]] = None
 
     @property
     def state(self) -> BridgeState:
