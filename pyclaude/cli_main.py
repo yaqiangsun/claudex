@@ -70,7 +70,9 @@ async def _run_query(
     from . import bootstrap
     from .query_engine import QueryEngine, QueryEngineConfig
     from .tool import Tool
-    from .utils import get_main_loop_model
+    from .tools import get_all_tools
+    from .commands import get_all_commands
+    from .state import AppState, get_app_state, set_app_state
 
     # Initialize state
     cwd = os.getcwd()
@@ -81,6 +83,14 @@ async def _run_query(
     if not api_key:
         click.echo("Error: ANTHROPIC_API_KEY not set", err=True)
         sys.exit(1)
+
+    # Load tools and commands
+    tools = get_all_tools()
+    commands = get_all_commands()
+
+    click.echo(f"Using model: {model}")
+    click.echo(f"Prompt: {prompt}")
+    click.echo(f"Loaded {len(tools)} tools, {len(commands)} commands")
 
     # Create query engine config
     async def default_can_use_tool(
@@ -95,13 +105,13 @@ async def _run_query(
 
     config = QueryEngineConfig(
         cwd=cwd,
-        tools=[],  # TODO: add tools
-        commands=[],
+        tools=tools,
+        commands=commands,
         mcp_clients=[],
         agents=[],
         can_use_tool=default_can_use_tool,
-        get_app_state=lambda: {},
-        set_app_state=lambda f: None,
+        get_app_state=get_app_state,
+        set_app_state=set_app_state,
         read_file_cache={},
         user_specified_model=model,
         verbose=verbose,
@@ -111,9 +121,34 @@ async def _run_query(
     # Create and run query engine
     engine = QueryEngine(config)
 
-    click.echo(f"Using model: {model}")
-    click.echo(f"Prompt: {prompt}")
-    click.echo("Query engine initialized (full execution not yet implemented)")
+    # Execute the query and collect results
+    click.echo("\n--- Response ---")
+
+    async for message in engine.submit_message(prompt):
+        msg_type = message.get('type')
+
+        if msg_type == 'message':
+            content = message.get('message', {}).get('content', [])
+            for block in content:
+                if block.get('type') == 'text':
+                    click.echo(block.get('text', ''))
+                elif block.get('type') == 'thinking':
+                    if verbose:
+                        click.echo(f"[Thinking] {block.get('thinking', '')[:100]}...")
+
+        elif msg_type == 'tool_result':
+            result = message.get('result', {})
+            tool_id = result.get('tool_use_id', '')
+            content = result.get('content', '')
+            is_error = result.get('is_error', False)
+            if verbose:
+                prefix = "[Error] " if is_error else "[Tool Result] "
+                click.echo(f"{prefix}{content[:200]}...")
+
+        elif msg_type == 'error':
+            click.echo(f"Error: {message.get('error')}", err=True)
+
+    click.echo("\n--- Done ---")
 
 
 def _run_repl() -> None:

@@ -3,7 +3,9 @@ API service for calling Anthropic.
 """
 
 import os
-from typing import Any, Optional
+from typing import Any, Optional, AsyncGenerator
+
+from .client import get_anthropic_client
 
 
 # Default model
@@ -36,13 +38,28 @@ async def call_anthropic_api(
     Returns:
         API response as dict
     """
-    import httpx
+    from ...utils.auth import get_anthropic_api_key
 
-    api_key = os.getenv('ANTHROPIC_API_KEY')
+    api_key = get_anthropic_api_key()
+    if not api_key:
+        # Try environment variable directly as fallback
+        api_key = os.getenv('ANTHROPIC_API_KEY')
     if not api_key:
         raise ValueError('ANTHROPIC_API_KEY not set')
 
     model = model or DEFAULT_MODEL
+
+    # Convert tools to API schema
+    tools_schema = None
+    if tools:
+        tools_schema = []
+        for tool in tools:
+            if hasattr(tool, 'name'):
+                tools_schema.append({
+                    'name': tool.name,
+                    'description': getattr(tool, 'description', ''),
+                    'input_schema': getattr(tool, 'input_schema', {}),
+                })
 
     # Build request payload
     payload: dict[str, Any] = {
@@ -57,15 +74,8 @@ async def call_anthropic_api(
         payload['system'] = system_prompt
 
     # Add tools if provided
-    if tools:
-        payload['tools'] = [
-            {
-                'name': tool.name,
-                'description': tool.description,
-                'input_schema': tool.input_schema if hasattr(tool, 'input_schema') else {},
-            }
-            for tool in tools
-        ]
+    if tools_schema:
+        payload['tools'] = tools_schema
 
     # Add thinking config
     if thinking_config and thinking_config.get('type') != 'disabled':
@@ -75,26 +85,69 @@ async def call_anthropic_api(
     if json_schema:
         payload['json_schema'] = json_schema
 
-    # Make request
-    async with httpx.AsyncClient() as client:
-        response = await client.post(
-            'https://api.anthropic.com/v1/messages',
-            headers={
-                'x-api-key': api_key,
-                'anthropic-version': '2023-06-01',
-                'content-type': 'application/json',
-            },
-            json=payload,
-            timeout=300.0,
-        )
+    # Get client and make request
+    client = await get_anthropic_client(api_key=api_key)
+    response = await client.create_message(
+        model=model,
+        messages=messages,
+        system=system_prompt,
+        tools=tools_schema,
+        max_tokens=max_tokens,
+        **{k: v for k, v in {
+            'temperature': temperature,
+            'thinking': thinking_config if thinking_config and thinking_config.get('type') != 'disabled' else None,
+            'json_schema': json_schema,
+        }.items() if v is not None}
+    )
 
-        if response.status_code != 200:
-            raise Exception(f'API error: {response.status_code} - {response.text}')
+    # Convert to internal message format
+    return _convert_response_to_message(response)
 
-        data = response.json()
 
-        # Convert to internal message format
-        return _convert_response_to_message(data)
+async def call_anthropic_api_stream(
+    messages: list[dict],
+    tools: Optional[list[Any]] = None,
+    thinking_config: Optional[dict] = None,
+    json_schema: Optional[dict] = None,
+    model: Optional[str] = None,
+    max_tokens: int = 8192,
+    system_prompt: Optional[str] = None,
+) -> AsyncGenerator[dict, None]:
+    """Call the Anthropic API with streaming."""
+    from ...utils.auth import get_anthropic_api_key
+
+    api_key = get_anthropic_api_key()
+    if not api_key:
+        api_key = os.getenv('ANTHROPIC_API_KEY')
+    if not api_key:
+        raise ValueError('ANTHROPIC_API_KEY not set')
+
+    model = model or DEFAULT_MODEL
+
+    # Convert tools to API schema
+    tools_schema = None
+    if tools:
+        tools_schema = []
+        for tool in tools:
+            if hasattr(tool, 'name'):
+                tools_schema.append({
+                    'name': tool.name,
+                    'description': getattr(tool, 'description', ''),
+                    'input_schema': getattr(tool, 'input_schema', {}),
+                })
+
+    # Get client and create streaming request
+    client = await get_anthropic_client(api_key=api_key)
+
+    async for chunk in client.create_message_stream(
+        model=model,
+        messages=messages,
+        system=system_prompt,
+        tools=tools_schema,
+        max_tokens=max_tokens,
+    ):
+        if chunk.strip():
+            yield chunk
 
 
 def _convert_response_to_message(data: dict) -> dict:

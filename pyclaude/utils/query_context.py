@@ -60,8 +60,42 @@ def add_to_history(
     })
 
 
+async def fetch_system_prompt_parts(
+    tools: list,
+    main_loop_model: str,
+    additional_working_directories: list = None,
+    mcp_clients: list = None,
+    custom_system_prompt: str = None,
+    append_system_prompt: str = None,
+) -> dict:
+    """Fetch system prompt parts for the API."""
+    # Simplified implementation
+    from ..context import get_system_prompt, get_user_context, get_system_context
+
+    if custom_system_prompt is not None:
+        default_system_prompt = []
+        system_context = {}
+    else:
+        default_system_prompt = await get_system_prompt(
+            tools,
+            main_loop_model,
+            additional_working_directories or [],
+            mcp_clients or [],
+        )
+        system_context = await get_system_context()
+
+    user_context = await get_user_context()
+
+    return {
+        'default_system_prompt': default_system_prompt,
+        'user_context': user_context,
+        'system_context': system_context,
+    }
+
+
 __all__ = [
     "QueryContext",
     "create_query_context",
     "add_to_history",
+    "fetch_system_prompt_parts",
 ]

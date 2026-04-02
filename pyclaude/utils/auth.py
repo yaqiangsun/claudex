@@ -6,6 +6,12 @@ import os
 from typing import Optional, Tuple
 
 
+def get_anthropic_api_key() -> Optional[str]:
+    """Get the Anthropic API key."""
+    key, _ = get_anthropic_api_key_with_source()
+    return key
+
+
 def is_anthropic_auth_enabled() -> bool:
     """Check if Anthropic authentication is enabled."""
     return bool(os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("CLAUDE_API_KEY"))
@@ -54,6 +60,7 @@ async def get_api_key_from_api_key_helper(is_non_interactive: bool) -> Optional[
 
 
 __all__ = [
+    "get_anthropic_api_key",
     "is_anthropic_auth_enabled",
     "is_claude_ai_subscriber",
     "get_anthropic_api_key_with_source",

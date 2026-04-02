@@ -26,9 +26,15 @@ COMMANDS: Dict[str, Any] = {
     'init': {'call': init_call, 'description': 'Initialize project'},
 }
 
+def get_all_commands() -> list:
+    """Get all available commands."""
+    return list(COMMANDS.values())
+
+
 __all__ = [
     # Local commands
     'COMMANDS',
+    'get_all_commands',
     'help_call',
     'clear_call',
     'compact_call',

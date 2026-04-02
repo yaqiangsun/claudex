@@ -7,9 +7,10 @@ Python adaptation of the Bash tool for executing shell commands.
 from typing import Any, Dict, Optional, Callable
 import asyncio
 import os
-import subprocess
 import time
 from dataclasses import dataclass
+
+from . import BaseTool
 
 
 BASH_TOOL_NAME = "Bash"
@@ -51,9 +52,34 @@ class BashToolOutput:
     duration_ms: float
 
 
+class BashTool(BaseTool):
+    """Tool for executing shell commands."""
+
+    def __init__(self):
+        super().__init__(BASH_TOOL_NAME, DESCRIPTION)
+        self.input_schema = {
+            "type": "object",
+            "properties": {
+                "command": {"type": "string", "description": "The command to execute"},
+                "timeout": {"type": "number", "description": "Timeout in milliseconds"},
+                "description": {"type": "string", "description": "Description of the command"},
+            },
+            "required": ["command"],
+        }
+
+    async def execute(
+        self,
+        input_dict: Dict[str, Any],
+        get_app_state: Callable,
+        set_app_state: Callable,
+        abort_controller: Optional[Any] = None,
+    ) -> Dict[str, Any]:
+        """Execute a bash command."""
+        return await execute_bash(input_dict, get_app_state, set_app_state, abort_controller)
+
+
 def parse_command(command: str) -> Dict[str, Any]:
     """Parse a shell command to determine its type and properties."""
-    # Get the base command
     parts = command.strip().split()
     base_cmd = parts[0] if parts else ""
 
@@ -85,10 +111,7 @@ async def execute_bash(
                 "error": "command is required",
             }
 
-        # Parse command for metadata
         cmd_info = parse_command(command)
-
-        # Execute command
         result = await _run_command(command, timeout_ms, abort_controller)
 
         duration_ms = (time.time() - start_time) * 1000
@@ -122,11 +145,9 @@ async def _run_command(
     abort_controller: Optional[Any] = None,
 ) -> Dict[str, str]:
     """Run a shell command."""
-    # Get current working directory
     cwd = os.getcwd()
 
     try:
-        # Run command with subprocess
         process = await asyncio.create_subprocess_shell(
             command,
             stdout=asyncio.subprocess.PIPE,
@@ -134,7 +155,6 @@ async def _run_command(
             cwd=cwd,
         )
 
-        # Wait for completion with timeout
         try:
             stdout, stderr = await asyncio.wait_for(
                 process.communicate(),
@@ -167,6 +187,7 @@ def get_default_timeout_ms() -> int:
 __all__ = [
     "BASH_TOOL_NAME",
     "DESCRIPTION",
+    "BashTool",
     "BashToolInput",
     "BashToolOutput",
     "execute_bash",
