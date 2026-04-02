@@ -5,7 +5,7 @@ Dynamic environment variable handling.
 """
 
 import os
-from typing import Dict, Optional, Callable, Any
+from typing import Dict, Optional, Callable
 
 
 # Dynamic env var resolvers
@@ -13,37 +13,19 @@ _resolvers: Dict[str, Callable[[], str]] = {}
 
 
 def register_env_resolver(name: str, resolver: Callable[[], str]) -> None:
-    """Register a dynamic env var resolver.
-
-    Args:
-        name: Environment variable name
-        resolver: Function that returns the value
-    """
+    """Register a dynamic env var resolver."""
     _resolvers[name] = resolver
 
 
 def get_env_var(name: str, default: Optional[str] = None) -> str:
-    """Get environment variable with dynamic resolution.
-
-    Args:
-        name: Variable name
-        default: Default value
-
-    Returns:
-        Variable value
-    """
+    """Get environment variable with dynamic resolution."""
     if name in _resolvers:
         return _resolvers[name]()
-
     return os.environ.get(name, default or "")
 
 
 def resolve_all_env_vars() -> Dict[str, str]:
-    """Resolve all dynamic environment variables.
-
-    Returns:
-        Dict of all env vars
-    """
+    """Resolve all dynamic environment variables."""
     result = dict(os.environ)
     for name, resolver in _resolvers.items():
         result[name] = resolver()
