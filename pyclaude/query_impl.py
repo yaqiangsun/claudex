@@ -105,8 +105,15 @@ async def query(
         # Yield response message
         yield {'type': 'message', 'message': response}
 
-        # Add assistant message to history
-        messages.append(response)
+        # Add assistant message to history (convert to API format)
+        # Filter out tool_use blocks - they should not be in the message history
+        content = response.get('content', [])
+        filtered_content = [c for c in content if c.get('type') != 'tool_use']
+        messages.append({
+            'type': 'message',
+            'role': 'assistant',
+            'content': filtered_content,
+        })
 
         # Process tool uses
         tool_uses = _extract_tool_uses(response)
@@ -130,6 +137,7 @@ async def query(
                 # Tool was denied
                 tool_result = {
                     'type': 'tool_result',
+                    'role': 'user',  # Required by API
                     'tool_use_id': tool_use['id'],
                     'content': f"Tool '{tool_use['name']}' was denied",
                     'is_error': True,
@@ -153,6 +161,7 @@ async def query(
             # Yield tool result
             tool_result = {
                 'type': 'tool_result',
+                'role': 'user',  # Required by API
                 'tool_use_id': tool_use['id'],
                 'content': result.get('content', ''),
                 'is_error': result.get('is_error', False),

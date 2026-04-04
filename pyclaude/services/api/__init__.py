@@ -154,9 +154,10 @@ def _convert_response_to_message(data: dict) -> dict:
     """Convert API response to internal message format."""
     message = data.get('content', [])
 
-    # Handle thinking blocks
+    # Handle thinking blocks, text, and tool_use
     thinking_content = []
     text_content = []
+    tool_use_content = []
 
     for block in message:
         if block.get('type') == 'thinking':
@@ -169,9 +170,16 @@ def _convert_response_to_message(data: dict) -> dict:
                 'type': 'text',
                 'text': block.get('text', ''),
             })
+        elif block.get('type') == 'tool_use':
+            tool_use_content.append({
+                'type': 'tool_use',
+                'id': block.get('id', ''),
+                'name': block.get('name', ''),
+                'input': block.get('input', {}),
+            })
 
-    # Combine content
-    combined_content = thinking_content + text_content
+    # Combine content - tool_use comes after thinking, before/after text
+    combined_content = thinking_content + text_content + tool_use_content
 
     return {
         'type': 'message',

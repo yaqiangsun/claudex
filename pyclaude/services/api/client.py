@@ -115,10 +115,15 @@ class AnthropicClient:
         # Select endpoint - check for common API patterns
         endpoint = os.environ.get("ANTHROPIC_API_PATH", "/v1/messages")
 
-        print(f"[DEBUG] API endpoint: {self.base_url}{endpoint}")
-        print(f"[DEBUG] Model: {model}")
-        print(f"[DEBUG] Headers: {headers}")
-        print(f"[DEBUG] Payload: {payload}")
+        # print(f"[DEBUG] API endpoint: {self.base_url}{endpoint}")
+        # print(f"[DEBUG] Model: {model}")
+        # print(f"[DEBUG] Headers: {headers}")
+        # print(f"[DEBUG] Payload: {payload}")
+        # Debug: print messages structure
+        # print(f"[DEBUG] messages count: {len(messages)}")
+        # for i, msg in enumerate(messages):
+        #     print(f"[DEBUG] msg[{i}] role={msg.get('role')}, type={msg.get('type')}, content types={[c.get('type') if isinstance(c, dict) else str(c) for c in msg.get('content', [])]}")
+
         response = await client.post(endpoint, json=payload, headers=headers)
         response.raise_for_status()
         return response.json()
