@@ -3,6 +3,7 @@ Task definitions for background operations.
 """
 
 import secrets
+from dataclasses import dataclass
 from enum import Enum
 from typing import TYPE_CHECKING, Callable, Protocol, runtime_checkable, Optional
 
@@ -119,9 +120,6 @@ class TaskStateBase:
     output_file: str = ''
     output_offset: int = 0
     notified: bool = False
-
-
-from dataclasses import dataclass
 
 
 def create_task_state_base(
