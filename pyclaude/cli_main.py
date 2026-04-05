@@ -218,26 +218,128 @@ def _format_tool_input(tool_name: str, tool_input: dict) -> str:
 
 def _run_repl() -> None:
     """Run interactive REPL mode."""
-    from . import bootstrap
-    bootstrap.initialize_state(os.getcwd())
+    import asyncio
 
-    click.echo("PyClaude REPL")
-    click.echo("Type 'exit' to quit")
-    click.echo("")
+    async def run_repl_async() -> None:
+        from . import bootstrap
+        from .query_engine import QueryEngine, QueryEngineConfig
+        from .tool import Tool
+        from .tools import get_all_tools
+        from .commands import get_all_commands
+        from .state import get_app_state, set_app_state
 
-    while True:
-        try:
-            prompt = input("> ")
-            if prompt.lower() in ('exit', 'quit', 'q'):
+        # Initialize
+        cwd = os.getcwd()
+        bootstrap.initialize_state(cwd)
+
+        # Get API key
+        api_key = get_api_key()
+        if not api_key:
+            click.echo("Error: ANTHROPIC_API_KEY not set", err=True)
+            return
+
+        # Load tools and commands
+        tools = get_all_tools()
+        commands = get_all_commands()
+
+        click.echo("PyClaude REPL")
+        click.echo("Type 'exit' to quit, '/compact' to compact conversation")
+        click.echo("")
+
+        # Create query engine config
+        async def default_can_use_tool(
+            tool: Tool,
+            input_dict: dict,
+            context: Any,
+            assistant_message: dict,
+            tool_use_id: str,
+            force_decision: Optional[str] = None,
+        ) -> dict:
+            return {"behavior": "allow", "updated_input": input_dict}
+
+        # Get model
+        from .utils.model import get_main_loop_model
+        model = get_main_loop_model()
+
+        config = QueryEngineConfig(
+            cwd=cwd,
+            tools=tools,
+            commands=commands,
+            mcp_clients=[],
+            agents=[],
+            can_use_tool=default_can_use_tool,
+            get_app_state=get_app_state,
+            set_app_state=set_app_state,
+            read_file_cache={},
+            user_specified_model=model,
+        )
+
+        # Create engine - this persists across turns
+        engine = QueryEngine(config)
+
+        # Run REPL loop
+        while True:
+            try:
+                prompt = input("> ")
+                if prompt.lower() in ('exit', 'quit', 'q'):
+                    break
+                if not prompt.strip():
+                    continue
+
+                # Run query and display results
+                tool_call_count = 0
+
+                async for message in engine.submit_message(prompt):
+                    msg_type = message.get('type')
+
+                    if msg_type == 'tool_call':
+                        tool_name = message.get('tool_name', '')
+                        tool_input = message.get('tool_input', {})
+                        tool_call_count += 1
+                        input_str = _format_tool_input(tool_name, tool_input)
+                        click.echo(f"[{tool_call_count}] → {tool_name}: {input_str}")
+
+                    elif msg_type == 'message':
+                        content = message.get('message', {}).get('content', [])
+                        for block in content:
+                            if block.get('type') == 'text':
+                                text = block.get('text', '')
+                                text = '\n'.join(line for line in text.split('\n') if line.strip())
+                                if text.strip():
+                                    click.echo(text)
+
+                    elif msg_type == 'tool_result':
+                        result = message.get('result', {})
+                        content = result.get('content', '')
+                        is_error = result.get('is_error', False)
+                        if content:
+                            display_content = content[:150].replace('\n', ' ') + ('...' if len(content) > 150 else '')
+                        else:
+                            display_content = '(empty)'
+                        if is_error:
+                            click.echo(f"[{tool_call_count}] ✗ Error: {display_content}")
+                        else:
+                            click.echo(f"[{tool_call_count}] ✓ {display_content}")
+
+                    elif msg_type == 'auto_compact':
+                        pre = message.get('pre_compact_token_count', 0)
+                        post = message.get('post_compact_token_count', 0)
+                        click.echo(f"[Auto-compact] {pre} → {post} tokens")
+
+                    elif msg_type == 'error':
+                        click.echo(f"Error: {message.get('error')}", err=True)
+
+                click.echo("")
+
+            except KeyboardInterrupt:
+                click.echo("")
                 break
-            if prompt.strip():
-                click.echo(f"Processing: {prompt}")
-        except KeyboardInterrupt:
-            break
-        except EOFError:
-            break
+            except EOFError:
+                break
 
-    click.echo("Goodbye!")
+        click.echo("Goodbye!")
+
+    asyncio.run(run_repl_async())
 
 
 if __name__ == "__main__":
