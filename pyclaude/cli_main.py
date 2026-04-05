@@ -56,9 +56,11 @@ def main(
         _run_repl()
         return
 
+    # If no prompt provided, start REPL mode by default
     if not prompt:
-        click.echo("Error: Prompt required", err=True)
-        sys.exit(1)
+        click.echo("Starting REPL mode (no prompt provided)...")
+        _run_repl()
+        return
 
     # Run single query
     try:
