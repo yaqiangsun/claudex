@@ -3,7 +3,16 @@ Query implementation - handles the actual message loop and tool execution.
 """
 
 import asyncio
+import logging
 from typing import Any, AsyncGenerator, Optional, Union
+
+from .services.compact import (
+    auto_compact_if_needed,
+    create_auto_compact_tracking,
+    build_post_compact_messages,
+)
+
+logger = logging.getLogger(__name__)
 
 
 async def query(
@@ -69,6 +78,9 @@ async def query(
     abort_controller = abort_controller or AbortController()
     turn_count = 0
 
+    # Initialize auto-compact tracking
+    auto_compact_tracking = create_auto_compact_tracking()
+
     # Build user message
     user_message = _build_user_message(prompt)
 
@@ -89,6 +101,52 @@ async def query(
             break
 
         turn_count += 1
+
+        # Auto-compact: check if we need to compact before making API call
+        model = model or "claude-sonnet-4-20250514"
+
+        # Build tool context for auto-compact
+        tool_context = {
+            'get_app_state': get_app_state,
+            'set_app_state': set_app_state,
+            'read_file_state': read_file_state,
+            'model': model,
+        }
+
+        # Try auto-compact if enabled
+        auto_compact_result = await auto_compact_if_needed(
+            messages=messages,
+            tool_use_context=tool_context,
+            query_source='query',
+            tracking=auto_compact_tracking,
+        )
+
+        if auto_compact_result.get('was_compacted'):
+            # Compaction happened - update messages
+            compaction_result = auto_compact_result.get('compaction_result')
+            if compaction_result:
+                new_messages = build_post_compact_messages(compaction_result)
+                messages = new_messages
+
+                # Update tracking
+                auto_compact_tracking.compacted = True
+                auto_compact_tracking.turn_counter = 0
+
+                # Yield compaction event
+                yield {
+                    'type': 'auto_compact',
+                    'pre_compact_token_count': compaction_result.pre_compact_token_count,
+                    'post_compact_token_count': compaction_result.post_compact_token_count,
+                }
+
+                logger.info(
+                    f"Auto-compact succeeded: {compaction_result.pre_compact_token_count} -> "
+                    f"{compaction_result.post_compact_token_count} tokens"
+                )
+
+        # Update consecutive failures count
+        if 'consecutive_failures' in auto_compact_result:
+            auto_compact_tracking.consecutive_failures = auto_compact_result['consecutive_failures']
 
         # Call API
         response = await _call_api(
@@ -117,6 +175,10 @@ async def query(
 
         # Process tool uses
         tool_uses = _extract_tool_uses(response)
+
+        # Update turn counter after tool execution (if we compacted previously)
+        if auto_compact_tracking.compacted:
+            auto_compact_tracking.turn_counter += 1
 
         if not tool_uses:
             # No more tool uses, we're done
