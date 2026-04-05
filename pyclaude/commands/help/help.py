@@ -6,21 +6,32 @@ from typing import Any, Dict, List
 # List of available commands
 AVAILABLE_COMMANDS = [
     {'name': 'help', 'description': 'Show help and available commands'},
-    {'name': 'clear', 'description': 'Clear conversation history'},
+    {'name': 'clear', 'description': 'Clear screen, cache, or conversation'},
     {'name': 'compact', 'description': 'Compact conversation but keep summary'},
     {'name': 'commit', 'description': 'Create a git commit'},
+    {'name': 'branch', 'description': 'Branch the conversation'},
     {'name': 'resume', 'description': 'Resume a previous conversation'},
+    {'name': 'session', 'description': 'Manage sessions'},
     {'name': 'version', 'description': 'Print version info'},
     {'name': 'status', 'description': 'Show session status'},
-    {'name': 'tasks', 'description': 'List running tasks'},
+    {'name': 'stats', 'description': 'Show session statistics'},
+    {'name': 'cost', 'description': 'Show API usage and cost'},
+    {'name': 'model', 'description': 'Switch between Claude models'},
+    {'name': 'theme', 'description': 'Change color theme'},
+    {'name': 'fast', 'description': 'Toggle fast mode'},
     {'name': 'skills', 'description': 'Manage skills'},
-    {'name': 'config', 'description': 'Open config panel'},
+    {'name': 'plugins', 'description': 'Manage plugins'},
+    {'name': 'config', 'description': 'Manage settings'},
     {'name': 'mcp', 'description': 'Manage MCP servers'},
     {'name': 'doctor', 'description': 'Run diagnostics'},
+    {'name': 'exit', 'description': 'Exit Claude Code'},
+    {'name': 'login', 'description': 'Authenticate with Claude API'},
+    {'name': 'diff', 'description': 'Show git diff'},
+    {'name': 'files', 'description': 'Manage files'},
 ]
 
 
-async def execute(args: str, context: Dict[str, Any]) -> Dict[str, str]:
+async def execute(args: str, context: Dict[str, Any]) -> Dict[str, Any]:
     """Execute the help command."""
     if args.strip():
         # Show help for specific command
@@ -37,10 +48,33 @@ async def execute(args: str, context: Dict[str, Any]) -> Dict[str, str]:
         }
 
     # Show general help
-    lines = ['Available commands:', '']
-    for cmd in AVAILABLE_COMMANDS:
-        lines.append(f"  /{cmd['name']} - {cmd['description']}")
-    lines.append('')
+    lines = [
+        'Claude Code Commands',
+        '=' * 40,
+        '',
+    ]
+
+    # Group commands by category
+    core = ['help', 'exit', 'clear', 'compact']
+    git = ['commit', 'diff', 'branch', 'resume', 'session']
+    settings = ['config', 'model', 'theme', 'fast', 'login']
+    management = ['status', 'stats', 'cost', 'doctor']
+    plugins = ['mcp', 'plugins', 'skills']
+
+    def print_group(title, cmds):
+        lines.append(f'{title}:')
+        for c in cmds:
+            for cmd in AVAILABLE_COMMANDS:
+                if cmd['name'] == c:
+                    lines.append(f"  /{cmd['name']} - {cmd['description']}")
+        lines.append('')
+
+    print_group('Core', core)
+    print_group('Git', git)
+    print_group('Settings', settings)
+    print_group('Session', management)
+    print_group('Plugins', plugins)
+
     lines.append('Type /help <command> for more info on a specific command.')
 
     return {'type': 'text', 'value': '\n'.join(lines)}
@@ -51,7 +85,9 @@ CONFIG = {
     'type': 'local',
     'name': 'help',
     'description': 'Show help and available commands',
+    'aliases': ['?', 'h'],
+    'supports_non_interactive': True,
 }
 
 
-call = execute  # Alias for compatibility
+call = execute

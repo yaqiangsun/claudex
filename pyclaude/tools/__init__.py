@@ -34,23 +34,24 @@ class BaseTool(ABC):
         pass
 
 
-# Placeholder for tool implementations
 def get_all_tools() -> list:
     """Get all available tools."""
     from .bash_tool import BashTool
-    # from .read_tool import ReadTool  # Not yet converted
-    # from .edit_tool import EditTool
-    # from .write_tool import WriteTool
-    # from .glob_tool import GlobTool
-    # from .grep_tool import GrepTool
+    from .read_tool import ReadTool
+    from .edit_tool import EditTool
+    from .write_tool import WriteTool
+    from .glob_tool import GlobTool
+    from .grep_tool import GrepTool
+    from .agent_tool import AgentTool
 
     return [
         BashTool(),
-        # ReadTool(),
-        # EditTool(),
-        # WriteTool(),
-        # GlobTool(),
-        # GrepTool(),
+        ReadTool(),
+        EditTool(),
+        WriteTool(),
+        GlobTool(),
+        GrepTool(),
+        AgentTool(),
     ]
 
 
