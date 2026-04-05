@@ -9,10 +9,15 @@ PyClaude 是类Claude Code 的 Python 版本，主要目的是还原原始 TypeS
 ## 特性
 
 - **核心查询引擎** - 支持多轮对话和工具调用
-- **命令系统** - 完整的命令注册和执行框架
+- **命令系统** - 100+ 内置命令 (commit, init, status 等)
 - **Bridge 远程控制** - 支持远程会话控制
 - **多种传输协议** - WebSocket、SSE、Hybrid 传输支持
 - **REPL 交互模式** - 交互式命令行界面
+- **工具系统** - 40+ 内置工具 (glob, grep, edit, write 等)
+- **Hooks 系统** - 80+ 钩子用于扩展
+- **MCP 集成** - Model Context Protocol 支持
+- **插件系统** - 插件支持
+- **服务** - 分析、LSP 等服务
 
 ## 架构
 
@@ -21,39 +26,61 @@ pyclaude/
 ├── __init__.py              # 包入口
 ├── __main__.py              # CLI 入口
 ├── cli_main.py              # CLI 主程序
+├── main.py                  # 主入口
 ├── bootstrap/               # 初始化模块
-│   └── __init__.py
 ├── bridge/                  # 远程控制模块
-│   ├── __init__.py
 │   ├── bridge_main.py       # Bridge 主控制器
 │   ├── repl_bridge.py       # REPL Bridge 实现
 │   ├── session.py           # 会话管理
 │   └── types.py             # 类型定义
 ├── cli/                     # CLI 模块
-│   ├── __init__.py
 │   ├── print.py             # 终端输出
 │   ├── structured_io.py     # 结构化 I/O
 │   └── transports/          # 传输层
-│       ├── __init__.py
 │       ├── transport.py     # 基础传输
 │       ├── websocket.py     # WebSocket
 │       ├── sse.py           # SSE
 │       └── hybrid.py        # Hybrid
-├── commands.py              # 命令系统
+├── commands/                # 命令系统 (100+ 命令)
+│   ├── commit.py
+│   ├── init.py
+│   ├── version.py
+│   ├── compact/             # Compact 命令
+│   ├── resume/              # Resume 命令
+│   ├── status/              # Status 命令
+│   ├── btw/                 # BTW 命令
+│   └── ...                  # 更多命令
+├── commands.py              # 命令系统基础
 ├── py_types/                # 类型定义
-│   ├── __init__.py
-│   └── ids.py               # ID 类型
 ├── query_engine.py          # 查询引擎
-├── query.py                 # 查询实现
+├── query_impl.py            # 查询实现
+├── services/                # 服务
+│   ├── mcp/                 # MCP 集成
+│   ├── lsp/                 # LSP 支持
+│   ├── plugins/             # 插件系统
+│   └── analytics/           # 分析服务
 ├── state/                   # 状态管理
-│   └── __init__.py
+├── tools/                   # 内置工具 (40+)
+│   ├── glob_tool.py
+│   ├── grep_tool.py
+│   ├── edit_tool.py
+│   └── write_tool.py
+├── hooks/                   # Hooks 系统 (80+ 钩子)
+├── utils/                   # 工具函数
+│   ├── model/               # 模型配置
+│   └── thinking.py          # 思考配置
 ├── task.py                  # 任务定义
 ├── tool.py                  # 工具定义
-└── utils/                   # 工具函数
-    ├── __init__.py
-    ├── model/               # 模型配置
-    │   └── model.py
-    └── thinking.py          # 思考配置
+├── context.py               # 上下文管理
+├── coordinator/             # 协调器
+├── buddy/                   # Buddy 系统
+├── components/              # UI 组件
+├── constants/               # 常量
+├── entrypoints/             # 入口点
+├── keybindings/             # 键盘绑定
+├── screens/                 # 屏幕定义
+├── server/                  # 服务器模块
+└── types/                   # 类型定义
 ```
 
 ## 安装
@@ -180,13 +207,16 @@ ruff check --fix .
 | 特性 | TypeScript 原版 | Python 版 |
 |------|----------------|-----------|
 | 核心引擎 | ✅ | ✅ |
-| 命令系统 | ✅ | ✅ |
+| 命令系统 | ✅ | ✅ (100+ 命令) |
 | Bridge | ✅ | ✅ |
 | 传输层 | ✅ | ✅ |
 | REPL | ✅ | ✅ |
-| MCP 集成 | ✅ | 规划中 |
-| 完整工具集 | ✅ | 规划中 |
-| UI 组件 | React/Ink | textual (规划中) |
+| 工具系统 | ✅ | ✅ (40+ 工具) |
+| Hooks 系统 | ✅ | ✅ (80+ 钩子) |
+| MCP 集成 | ✅ | ✅ |
+| 插件系统 | ✅ | ✅ |
+| 服务 | ✅ | ✅ |
+| UI 组件 | React/Ink | textual (进行中) |
 
 ## 许可证
 

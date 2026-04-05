@@ -9,10 +9,15 @@ PyClaude is a Python port of Claude Code, aiming to replicate the architecture a
 ## Features
 
 - **Core Query Engine** - Multi-turn conversation and tool calling support
-- **Command System** - Complete command registration and execution framework
+- **Command System** - 100+ built-in commands (commit, init, status, etc.)
 - **Bridge Remote Control** - Remote session control support
 - **Multiple Transport Protocols** - WebSocket, SSE, Hybrid transport support
 - **REPL Interactive Mode** - Interactive command-line interface
+- **Tool System** - 40+ built-in tools (glob, grep, edit, write, etc.)
+- **Hooks System** - 80+ hooks for extensibility
+- **MCP Integration** - Model Context Protocol support
+- **Plugin System** - Plugin support
+- **Services** - Analytics, LSP, and other services
 
 ## Architecture
 
@@ -21,39 +26,61 @@ pyclaude/
 ├── __init__.py              # Package entry
 ├── __main__.py              # CLI entry
 ├── cli_main.py              # CLI main program
+├── main.py                  # Main entry point
 ├── bootstrap/               # Initialization module
-│   └── __init__.py
 ├── bridge/                  # Remote control module
-│   ├── __init__.py
 │   ├── bridge_main.py       # Bridge main controller
 │   ├── repl_bridge.py       # REPL Bridge implementation
 │   ├── session.py           # Session management
 │   └── types.py             # Type definitions
 ├── cli/                     # CLI module
-│   ├── __init__.py
 │   ├── print.py             # Terminal output
 │   ├── structured_io.py     # Structured I/O
 │   └── transports/          # Transport layer
-│       ├── __init__.py
 │       ├── transport.py     # Base transport
 │       ├── websocket.py     # WebSocket
 │       ├── sse.py           # SSE
 │       └── hybrid.py        # Hybrid
-├── commands.py              # Command system
+├── commands/                # Command system (100+ commands)
+│   ├── commit.py
+│   ├── init.py
+│   ├── version.py
+│   ├── compact/             # Compact command
+│   ├── resume/              # Resume command
+│   ├── status/              # Status command
+│   ├── btw/                 # BTW command
+│   └── ...                  # Many more commands
+├── commands.py              # Command system base
 ├── py_types/                # Type definitions
-│   ├── __init__.py
-│   └── ids.py               # ID types
 ├── query_engine.py          # Query engine
-├── query.py                 # Query implementation
+├── query_impl.py            # Query implementation
+├── services/                # Services
+│   ├── mcp/                 # MCP integration
+│   ├── lsp/                 # LSP support
+│   ├── plugins/             # Plugin system
+│   └── analytics/           # Analytics
 ├── state/                   # State management
-│   └── __init__.py
+├── tools/                   # Built-in tools (40+)
+│   ├── glob_tool.py
+│   ├── grep_tool.py
+│   ├── edit_tool.py
+│   └── write_tool.py
+├── hooks/                   # Hooks system (80+ hooks)
+├── utils/                   # Utility functions
+│   ├── model/               # Model configuration
+│   └── thinking.py          # Thinking configuration
 ├── task.py                  # Task definition
 ├── tool.py                  # Tool definition
-└── utils/                   # Utility functions
-    ├── __init__.py
-    ├── model/               # Model configuration
-    │   └── model.py
-    └── thinking.py          # Thinking configuration
+├── context.py               # Context management
+├── coordinator/             # Coordinator
+├── buddy/                   # Buddy system
+├── components/              # UI components
+├── constants/               # Constants
+├── entrypoints/             # Entry points
+├── keybindings/             # Key bindings
+├── screens/                 # Screen definitions
+├── server/                  # Server module
+└── types/                   # Type definitions
 ```
 
 ## Installation
@@ -180,13 +207,16 @@ ruff check --fix .
 | Feature | TypeScript Original | Python Version |
 |---------|---------------------|----------------|
 | Core Engine | ✅ | ✅ |
-| Command System | ✅ | ✅ |
+| Command System | ✅ | ✅ (100+ commands) |
 | Bridge | ✅ | ✅ |
 | Transport Layer | ✅ | ✅ |
 | REPL | ✅ | ✅ |
-| MCP Integration | ✅ | Planned |
-| Complete Tool Set | ✅ | Planned |
-| UI Components | React/Ink | textual (planned) |
+| Tool System | ✅ | ✅ (40+ tools) |
+| Hooks System | ✅ | ✅ (80+ hooks) |
+| MCP Integration | ✅ | ✅ |
+| Plugin System | ✅ | ✅ |
+| Services | ✅ | ✅ |
+| UI Components | React/Ink | textual (in progress) |
 
 ## License
 
