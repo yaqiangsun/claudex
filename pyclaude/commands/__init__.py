@@ -105,16 +105,17 @@ except ImportError:
     LOGIN_CONFIG = {'name': 'login', 'description': 'Login'}
 
 # Command registry
+# Use callable for dynamic descriptions (like src's get description())
 COMMANDS: Dict[str, Any] = {
-    'help': {'call': help_call, 'description': 'Show help'},
-    'clear': {'call': clear_call, 'description': 'Clear conversation'},
-    'compact': {'call': compact_call, 'description': 'Compact conversation'},
-    'commit': {'call': commit_call, 'description': 'Create git commit'},
-    'resume': {'call': resume_call, 'description': 'Resume session'},
-    'version': {'call': version_call, 'description': 'Show version'},
+    'help': {'call': help_call, 'description': 'Show help and available commands'},
+    'clear': {'call': clear_call, 'description': 'Clear screen, cache, or conversation'},
+    'compact': {'call': compact_call, 'description': 'Compact conversation but keep summary'},
+    'commit': {'call': commit_call, 'description': 'Create a git commit'},
+    'resume': {'call': resume_call, 'description': 'Resume a previous conversation', 'aliases': ['continue']},
+    'version': {'call': version_call, 'description': 'Print version info'},
     'status': {'call': status_call, 'description': 'Show session status'},
-    'btw': {'call': btw_call, 'description': 'Add side note'},
-    'init': {'call': init_call, 'description': 'Initialize project'},
+    'btw': {'call': btw_call, 'description': 'Add a side note to the conversation'},
+    'init': {'call': init_call, 'description': 'Initialize a new project'},
 }
 
 # Add commands that have implementations
@@ -123,7 +124,11 @@ if exit_call:
 if session_call:
     COMMANDS['session'] = {'call': session_call, 'description': 'Manage sessions'}
 if model_call:
-    COMMANDS['model'] = {'call': model_call, 'description': 'Switch models'}
+    COMMANDS['model'] = {
+        'call': model_call,
+        'description': 'Switch between Claude models',
+        'get_description': lambda: _get_model_description(),
+    }
 if config_call:
     COMMANDS['config'] = {'call': config_call, 'description': 'Manage settings'}
 if mcp_call:
@@ -139,21 +144,54 @@ if plugins_call:
         if alias != 'plugins':
             COMMANDS[alias] = {'call': plugins_call, 'description': 'Manage plugins', 'aliases': aliases, 'is_alias': True}
 if theme_call:
-    COMMANDS['theme'] = {'call': theme_call, 'description': 'Change theme'}
+    COMMANDS['theme'] = {'call': theme_call, 'description': 'Change color theme'}
 if fast_call:
-    COMMANDS['fast'] = {'call': fast_call, 'description': 'Toggle fast mode'}
+    COMMANDS['fast'] = {
+        'call': fast_call,
+        'description': 'Toggle fast mode',
+        'get_description': lambda: _get_fast_description(),
+    }
 if doctor_call:
     COMMANDS['doctor'] = {'call': doctor_call, 'description': 'Run diagnostics'}
 if cost_call:
-    COMMANDS['cost'] = {'call': cost_call, 'description': 'Show cost'}
+    COMMANDS['cost'] = {'call': cost_call, 'description': 'Show API usage and cost'}
 if stats_call:
-    COMMANDS['stats'] = {'call': stats_call, 'description': 'Show statistics'}
+    COMMANDS['stats'] = {'call': stats_call, 'description': 'Show session statistics'}
 if diff_call:
     COMMANDS['diff'] = {'call': diff_call, 'description': 'Show git diff'}
 if files_call:
     COMMANDS['files'] = {'call': files_call, 'description': 'Manage files'}
 if login_call:
-    COMMANDS['login'] = {'call': login_call, 'description': 'Login'}
+    COMMANDS['login'] = {'call': login_call, 'description': 'Authenticate with Claude API'}
+
+
+def _get_model_description() -> str:
+    """Get dynamic model description showing current model."""
+    try:
+        from .utils.model import get_main_loop_model
+        model = get_main_loop_model()
+        # Shorten model name for display
+        if model:
+            display = model.replace('-20250514', '').replace('-20250501', '')
+            return f'Set the AI model for Claude Code (currently {display})'
+    except Exception:
+        pass
+    return 'Switch between Claude models'
+
+
+def _get_fast_description() -> str:
+    """Get dynamic fast mode description."""
+    return 'Toggle fast mode ( Sonnet 4.6 only)'
+
+
+def get_command_description(name: str) -> str:
+    """Get command description, supporting dynamic descriptions."""
+    cmd = COMMANDS.get(name, {})
+    # Check if there's a dynamic description getter
+    get_desc = cmd.get('get_description')
+    if callable(get_desc):
+        return get_desc()
+    return cmd.get('description', '')
 
 def get_all_commands() -> list:
     """Get all available commands."""
@@ -164,6 +202,7 @@ __all__ = [
     # Local commands
     'COMMANDS',
     'get_all_commands',
+    'get_command_description',
     'help_call',
     'clear_call',
     'compact_call',

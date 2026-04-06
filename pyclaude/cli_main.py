@@ -354,20 +354,20 @@ def show_welcome_banner() -> None:
 
 def show_command_suggestions(partial: str) -> None:
     """Show command suggestions for partial command."""
-    from .commands import COMMANDS
+    from .commands import COMMANDS, get_command_description
 
     matches = []
     # Check exact match and prefix match (e.g., plugin -> plugins)
     for name, info in COMMANDS.items():
         if name.startswith(partial.lower()) or partial.lower().startswith(name):
-            matches.append((name, info.get('description', '')))
+            matches.append((name, get_command_description(name)))
 
     # Also check if partial matches any alias
     if not matches:
         for name, info in COMMANDS.items():
             for alias in info.get('aliases', []):
                 if alias.startswith(partial.lower()):
-                    matches.append((name, info.get('description', '')))
+                    matches.append((name, get_command_description(name)))
                     break
 
     if matches:
@@ -387,12 +387,12 @@ def show_command_suggestions(partial: str) -> None:
             click.echo(f"Commands starting with /{letter}:")
             for name, info in sorted(COMMANDS.items()):
                 if name.startswith(letter):
-                    click.echo(f"  /{name:<15} {info.get('description', '')}")
+                    click.echo(f"  /{name:<15} {get_command_description(name)}")
         else:
             # Show all available commands
             click.echo("Available commands:")
             for name, info in sorted(COMMANDS.items()):
-                click.echo(f"  /{name:<15} {info.get('description', '')}")
+                click.echo(f"  /{name:<15} {get_command_description(name)}")
 
 
 def _run_repl() -> None:

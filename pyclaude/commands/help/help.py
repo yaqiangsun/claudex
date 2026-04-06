@@ -3,7 +3,7 @@
 from typing import Any, Dict, List
 
 
-# List of available commands
+# Base list of available commands (can be dynamically extended)
 AVAILABLE_COMMANDS = [
     {'name': 'help', 'description': 'Show help and available commands'},
     {'name': 'clear', 'description': 'Clear screen, cache, or conversation'},
@@ -31,6 +31,21 @@ AVAILABLE_COMMANDS = [
 ]
 
 
+def get_available_commands() -> List[Dict[str, Any]]:
+    """Get available commands, dynamically fetching descriptions from COMMANDS registry."""
+    # Try to get dynamic descriptions from COMMANDS registry
+    try:
+        from .. import get_command_description
+        result = []
+        for cmd in AVAILABLE_COMMANDS:
+            name = cmd['name']
+            desc = get_command_description(name) if name != 'help' else cmd['description']
+            result.append({'name': name, 'description': desc})
+        return result
+    except Exception:
+        return AVAILABLE_COMMANDS
+
+
 async def execute(args: str, context: Dict[str, Any]) -> Dict[str, Any]:
     """Execute the help command."""
     if args.strip():
@@ -54,6 +69,9 @@ async def execute(args: str, context: Dict[str, Any]) -> Dict[str, Any]:
         '',
     ]
 
+    # Get commands with dynamic descriptions
+    commands = get_available_commands()
+
     # Group commands by category
     core = ['help', 'exit', 'clear', 'compact']
     git = ['commit', 'diff', 'branch', 'resume', 'session']
@@ -64,7 +82,7 @@ async def execute(args: str, context: Dict[str, Any]) -> Dict[str, Any]:
     def print_group(title, cmds):
         lines.append(f'{title}:')
         for c in cmds:
-            for cmd in AVAILABLE_COMMANDS:
+            for cmd in commands:
                 if cmd['name'] == c:
                     lines.append(f"  /{cmd['name']} - {cmd['description']}")
         lines.append('')
