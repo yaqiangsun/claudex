@@ -229,6 +229,50 @@ async def run_command_async(cmd_func, args, context):
         return asyncio.run(cmd_func(args, context))
 
 
+def get_recent_activity() -> list:
+    """Get recent activity from sessions."""
+    try:
+        from .utils.list_sessions_impl import list_sessions_impl
+        sessions = list_sessions_impl()
+        # Return most recent sessions (up to 3)
+        return sessions[:3] if sessions else []
+    except Exception:
+        return []
+
+
+def get_tips_for_getting_started() -> list:
+    """Get tips based on current project state."""
+    tips = []
+    import os
+    from pathlib import Path
+
+    cwd = Path(os.getcwd())
+
+    # Check for CLAUDE.md
+    claude_md = cwd / 'CLAUDE.md'
+    if not claude_md.exists():
+        tips.append("Run /init to create a CLAUDE.md file with instructions for Claude")
+    else:
+        tips.append(f"CLAUDE.md found in {cwd.name}")
+
+    # Check for .git
+    git_dir = cwd / '.git'
+    if git_dir.exists():
+        tips.append("Git repository detected")
+
+    # Check for package.json or other project files
+    project_files = ['package.json', 'Cargo.toml', 'pyproject.toml', 'requirements.txt']
+    for pf in project_files:
+        if (cwd / pf).exists():
+            tips.append(f"{pf} detected - this appears to be a project")
+            break
+
+    if not tips:
+        tips.append("Type /help for available commands")
+
+    return tips[:3]  # Return up to 3 tips
+
+
 def show_welcome_banner() -> None:
     """Show welcome banner similar to src Claude Code."""
     # Get version
@@ -236,18 +280,75 @@ def show_welcome_banner() -> None:
     version = get_product_version()
     product = get_product_name()
 
-    # Welcome banner with ASCII art
+    # Get dynamic content
+    recent_activity = get_recent_activity()
+    tips = get_tips_for_getting_started()
+
+    # Format tips for display
+    tips_lines = []
+    if tips:
+        tips_lines.append(tips[0] if len(tips) > 0 else "")
+        tips_lines.append("─" * 62 if len(tips) > 1 else "")
+        tips_lines.append(tips[1] if len(tips) > 1 else "")
+        tips_lines.append(tips[2] if len(tips) > 2 else "")
+    else:
+        tips_lines = ["", "─" * 62, "", ""]
+
+    # Format recent activity with relative time
+    activity_lines = []
+    if recent_activity:
+        for activity in recent_activity[:3]:
+            title = activity.get('customTitle') or activity.get('firstPrompt') or 'Untitled'
+            title = title[:40] if title else 'Untitled'
+
+            # Format time as relative (e.g., "2h ago", "3d ago")
+            mod_time = activity.get('modified', '')
+            if mod_time:
+                try:
+                    import time as time_module
+                    mod_timestamp = float(mod_time)
+                    now = time_module.time()
+                    diff = now - mod_timestamp
+
+                    if diff < 60:
+                        time_str = "just now"
+                    elif diff < 3600:
+                        time_str = f"{int(diff/60)}m ago"
+                    elif diff < 86400:
+                        time_str = f"{int(diff/3600)}h ago"
+                    elif diff < 604800:
+                        time_str = f"{int(diff/86400)}d ago"
+                    else:
+                        time_str = f"{int(diff/604800)}w ago"
+                except Exception:
+                    time_str = ""
+            else:
+                time_str = ""
+
+            activity_lines.append(f"{title:<40} {time_str}")
+    else:
+        activity_lines = ["No recent activity", "", ""]
+
+    # Get model and working directory
+    import os
+    model = os.environ.get('CLAUDE_MODEL', 'MiniMaxAI/MiniMax-M2.5 with h…')
+    cwd = os.getcwd()
+    cwd_short = cwd if len(cwd) <= 40 else '~' + cwd[-39:]
+
+    # Welcome banner with ASCII art - matching src format
     click.echo(f"╭─── {product} {version} ──────────────────────────────────────────────────────────────────────────────────────────╮")
     click.echo(f"│                                                    │ Tips for getting started                                    │")
-    click.echo(f"│                    Welcome back!                   │ Run /init to create a CLAUDE.md file with instructions for… │")
-    click.echo(f"│                                                    │ ─────────────────────────────────────────────────────────── │")
-    click.echo(f"│                       ▐▛███▜▌                      │ Recent activity                                             │")
-    click.echo(f"│                      ▝▜█████▛▘                     │ No recent activity                                          │")
-    click.echo(f"│                        ▘▘ ▝▝                       │                                                             │")
+    click.echo(f"│                    Welcome back!                   │ {tips_lines[0][:60]}                    │")
+    click.echo(f"│                                                    │ {tips_lines[1] if len(tips_lines) > 1 else ''}                       │")
+    click.echo(f"│                       ▐▛███▜▌                      │ {tips_lines[2] if len(tips_lines) > 2 else ''}                       │")
+    click.echo(f"│                      ▝▜█████▛▘                     │                                                             │")
+    click.echo(f"│                        ▘▘ ▝▝                       │ Recent activity                                             │")
+    click.echo(f"│                                                    │ {activity_lines[0][:60]}                    │")
+    click.echo(f"│                                                    │ {activity_lines[1][:60] if len(activity_lines) > 1 else ''}                       │")
+    click.echo(f"│                                                    │ {activity_lines[2][:60] if len(activity_lines) > 2 else ''}                       │")
     click.echo(f"│                                                    │                                                             │")
-    click.echo(f" MiniMaxAI/MiniMax-M2.5 with h… · API Usage Billing │                                                             │")
-    import os
-    click.echo(f"            {os.getcwd()}             │                                                             │")
+    click.echo(f"│ {model[:55]:<57} │ /resume for more                                     │")
+    click.echo(f"│            {cwd_short:<40}             │                                                             │")
     click.echo("╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯")
 
 
