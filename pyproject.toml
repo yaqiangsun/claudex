@@ -15,6 +15,7 @@ dependencies = [
     "appdirs>=1.4.0",
     "gitpython>=3.1.0",
     "distro>=1.9.0",
+    "textual>=8.2.3",
 ]
 
 [project.optional-dependencies]
