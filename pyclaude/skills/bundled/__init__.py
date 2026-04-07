@@ -86,6 +86,7 @@ def init_bundled_skills() -> None:
         loop,
         schedule_remote_agents,
         claude_api,
+        claude_in_chrome,
     )
 
     update_config.register()
@@ -101,6 +102,9 @@ def init_bundled_skills() -> None:
     loop.register()
     schedule_remote_agents.register()
     claude_api.register()
+
+    # claude-in-chrome is conditionally enabled based on Chrome setup
+    claude_in_chrome.register()
 
 
 # Auto-initialize on import
