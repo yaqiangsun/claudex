@@ -3,13 +3,26 @@ import os
 import pytest
 from unittest.mock import patch
 
+# Import from new bundled location
+from pyclaude.skills.bundled import (
+    BundledSkillDefinition,
+    BUNDLED_SKILLS,
+    register_bundled_skill,
+    get_bundled_skill,
+    get_all_bundled_skills,
+    init_bundled_skills,
+    is_ant_user,
+    is_auto_memory_enabled,
+)
+from pyclaude.skills.bundled import lorem_ipsum as lorem_ipsum_module
+
 
 class TestBundledSkillDefinition:
     """Test BundledSkillDefinition class."""
 
     def test_default_values(self):
         """Test default values."""
-        from pyclaude.skills.bundled_skills import BundledSkillDefinition
+        from pyclaude.skills.bundled import BundledSkillDefinition
 
         skill = BundledSkillDefinition(
             name='test',
@@ -23,7 +36,7 @@ class TestBundledSkillDefinition:
 
     def test_custom_values(self):
         """Test custom values."""
-        from pyclaude.skills.bundled_skills import BundledSkillDefinition
+        from pyclaude.skills.bundled import BundledSkillDefinition
 
         def custom_check():
             return False
@@ -57,7 +70,7 @@ class TestRegisterBundledSkill:
 
     def test_register_skill(self):
         """Test registering a skill."""
-        from pyclaude.skills.bundled_skills import (
+        from pyclaude.skills.bundled import (
             BUNDLED_SKILLS,
             register_bundled_skill,
             BundledSkillDefinition,
@@ -70,7 +83,7 @@ class TestRegisterBundledSkill:
 
     def test_get_bundled_skill(self):
         """Test getting a bundled skill."""
-        from pyclaude.skills.bundled_skills import (
+        from pyclaude.skills.bundled import (
             get_bundled_skill,
             BundledSkillDefinition,
         )
@@ -81,14 +94,14 @@ class TestRegisterBundledSkill:
 
     def test_get_nonexistent_skill(self):
         """Test getting non-existent skill returns None."""
-        from pyclaude.skills.bundled_skills import get_bundled_skill
+        from pyclaude.skills.bundled import get_bundled_skill
 
         result = get_bundled_skill('nonexistent-skill')
         assert result is None
 
     def test_get_all_bundled_skills(self):
         """Test getting all bundled skills."""
-        from pyclaude.skills.bundled_skills import get_all_bundled_skills
+        from pyclaude.skills.bundled import get_all_bundled_skills
 
         skills = get_all_bundled_skills()
         assert len(skills) > 0
@@ -101,13 +114,13 @@ class TestIsAntUser:
     def test_not_ant_by_default(self):
         """Test not ant by default."""
         with patch.dict(os.environ, {}, clear=True):
-            from pyclaude.skills.bundled_skills import is_ant_user
+            from pyclaude.skills.bundled import is_ant_user
             assert is_ant_user() is False
 
     def test_ant_when_user_type_ant(self):
         """Test ant when USER_TYPE is ant."""
         with patch.dict(os.environ, {'USER_TYPE': 'ant'}):
-            from pyclaude.skills.bundled_skills import is_ant_user
+            from pyclaude.skills.bundled import is_ant_user
             assert is_ant_user() is True
 
 
@@ -116,7 +129,7 @@ class TestLoremIpsum:
 
     def test_generate_small(self):
         """Generate small amount of lorem ipsum."""
-        from pyclaude.skills.bundled_skills import generate_lorem_ipsum
+        from pyclaude.skills.bundled.lorem_ipsum import generate_lorem_ipsum
 
         text = generate_lorem_ipsum(10)
         assert len(text) > 0
@@ -124,14 +137,14 @@ class TestLoremIpsum:
 
     def test_generate_creates_sentences(self):
         """Generate creates proper sentences."""
-        from pyclaude.skills.bundled_skills import generate_lorem_ipsum
+        from pyclaude.skills.bundled.lorem_ipsum import generate_lorem_ipsum
 
         text = generate_lorem_ipsum(100)
         assert '.' in text
 
     def test_token_limit(self):
         """Test token limit is respected."""
-        from pyclaude.skills.bundled_skills import generate_lorem_ipsum
+        from pyclaude.skills.bundled.lorem_ipsum import generate_lorem_ipsum
 
         # Cap is 500k
         text = generate_lorem_ipsum(600_000)
@@ -145,7 +158,7 @@ class TestSkillPrompts:
 
     def test_update_config_prompt(self):
         """Test update-config skill prompt."""
-        from pyclaude.skills.bundled_skills import get_bundled_skill
+        from pyclaude.skills.bundled import get_bundled_skill
 
         skill = get_bundled_skill('update-config')
         assert skill is not None
@@ -157,7 +170,7 @@ class TestSkillPrompts:
 
     def test_debug_prompt(self):
         """Test debug skill prompt."""
-        from pyclaude.skills.bundled_skills import get_bundled_skill
+        from pyclaude.skills.bundled import get_bundled_skill
 
         skill = get_bundled_skill('debug')
         assert skill is not None
@@ -169,7 +182,7 @@ class TestSkillPrompts:
 
     def test_keybindings_prompt(self):
         """Test keybindings skill prompt."""
-        from pyclaude.skills.bundled_skills import get_bundled_skill
+        from pyclaude.skills.bundled import get_bundled_skill
 
         skill = get_bundled_skill('keybindings-help')
         assert skill is not None
@@ -181,7 +194,7 @@ class TestSkillPrompts:
 
     def test_simplify_prompt(self):
         """Test simplify skill prompt."""
-        from pyclaude.skills.bundled_skills import get_bundled_skill
+        from pyclaude.skills.bundled import get_bundled_skill
 
         skill = get_bundled_skill('simplify')
         assert skill is not None
@@ -193,7 +206,7 @@ class TestSkillPrompts:
 
     def test_remember_prompt(self):
         """Test remember skill prompt."""
-        from pyclaude.skills.bundled_skills import get_bundled_skill
+        from pyclaude.skills.bundled import get_bundled_skill
 
         skill = get_bundled_skill('remember')
         assert skill is not None
@@ -205,7 +218,7 @@ class TestSkillPrompts:
 
     def test_batch_prompt(self):
         """Test batch skill prompt."""
-        from pyclaude.skills.bundled_skills import get_bundled_skill
+        from pyclaude.skills.bundled import get_bundled_skill
 
         skill = get_bundled_skill('batch')
         assert skill is not None
@@ -217,7 +230,7 @@ class TestSkillPrompts:
 
     def test_batch_empty_args(self):
         """Test batch skill with empty args."""
-        from pyclaude.skills.bundled_skills import get_bundled_skill
+        from pyclaude.skills.bundled import get_bundled_skill
 
         skill = get_bundled_skill('batch')
         result = skill.get_prompt_for_command('')
@@ -226,7 +239,7 @@ class TestSkillPrompts:
 
     def test_loop_prompt(self):
         """Test loop skill prompt."""
-        from pyclaude.skills.bundled_skills import get_bundled_skill
+        from pyclaude.skills.bundled import get_bundled_skill
 
         skill = get_bundled_skill('loop')
         assert skill is not None
@@ -238,7 +251,7 @@ class TestSkillPrompts:
 
     def test_loop_empty_args(self):
         """Test loop skill with empty args."""
-        from pyclaude.skills.bundled_skills import get_bundled_skill
+        from pyclaude.skills.bundled import get_bundled_skill
 
         skill = get_bundled_skill('loop')
         result = skill.get_prompt_for_command('')
@@ -247,7 +260,7 @@ class TestSkillPrompts:
 
     def test_schedule_prompt(self):
         """Test schedule skill prompt."""
-        from pyclaude.skills.bundled_skills import get_bundled_skill
+        from pyclaude.skills.bundled import get_bundled_skill
 
         skill = get_bundled_skill('schedule')
         assert skill is not None
@@ -259,7 +272,7 @@ class TestSkillPrompts:
 
     def test_claude_api_prompt(self):
         """Test claude-api skill prompt."""
-        from pyclaude.skills.bundled_skills import get_bundled_skill
+        from pyclaude.skills.bundled import get_bundled_skill
 
         skill = get_bundled_skill('claude-api')
         assert skill is not None
@@ -278,11 +291,11 @@ class TestAntOnlySkills:
         """Verify skill registered for ant user."""
         # Re-import to pick up the patched env
         import importlib
-        from pyclaude.skills import bundled_skills
-        importlib.reload(bundled_skills)
-        bundled_skills.init_bundled_skills()
+        from pyclaude.skills import bundled
+        importlib.reload(bundled)
+        bundled.init_bundled_skills()
 
-        skill = bundled_skills.get_bundled_skill('verify')
+        skill = bundled.get_bundled_skill('verify')
         # For ant users, should be registered
         assert skill is not None
 
@@ -290,11 +303,11 @@ class TestAntOnlySkills:
     def test_verify_skill_not_registered_for_non_ant(self):
         """Verify skill not registered for non-ant user."""
         import importlib
-        from pyclaude.skills import bundled_skills
-        importlib.reload(bundled_skills)
-        bundled_skills.init_bundled_skills()
+        from pyclaude.skills import bundled
+        importlib.reload(bundled)
+        bundled.init_bundled_skills()
 
-        skill = bundled_skills.get_bundled_skill('verify')
+        skill = bundled.get_bundled_skill('verify')
         # For non-ant, verify should not be registered (returns None)
         # This is expected behavior from the original TS
 
@@ -304,7 +317,7 @@ class TestSkillAttributes:
 
     def test_update_config_attributes(self):
         """Test update-config has correct attributes."""
-        from pyclaude.skills.bundled_skills import get_bundled_skill
+        from pyclaude.skills.bundled import get_bundled_skill
 
         skill = get_bundled_skill('update-config')
         assert skill.name == 'update-config'
@@ -312,7 +325,7 @@ class TestSkillAttributes:
 
     def test_debug_attributes(self):
         """Test debug has correct attributes."""
-        from pyclaude.skills.bundled_skills import get_bundled_skill
+        from pyclaude.skills.bundled import get_bundled_skill
 
         skill = get_bundled_skill('debug')
         assert skill.name == 'debug'
@@ -321,14 +334,14 @@ class TestSkillAttributes:
 
     def test_keybindings_not_user_invocable(self):
         """Test keybindings is not user invocable."""
-        from pyclaude.skills.bundled_skills import get_bundled_skill
+        from pyclaude.skills.bundled import get_bundled_skill
 
         skill = get_bundled_skill('keybindings-help')
         assert skill.user_invocable is False
 
     def test_batch_disable_model_invocation(self):
         """Test batch has disable_model_invocation."""
-        from pyclaude.skills.bundled_skills import get_bundled_skill
+        from pyclaude.skills.bundled import get_bundled_skill
 
         skill = get_bundled_skill('batch')
         assert skill.disable_model_invocation is True
@@ -339,7 +352,7 @@ class TestHooksParsing:
 
     def test_parse_leading_interval(self):
         """Parse leading interval token."""
-        from pyclaude.skills.bundled_skills import get_bundled_skill
+        from pyclaude.skills.bundled import get_bundled_skill
 
         skill = get_bundled_skill('loop')
         result = skill.get_prompt_for_command('5m check the deploy')
@@ -348,7 +361,7 @@ class TestHooksParsing:
 
     def test_parse_trailing_every(self):
         """Parse trailing every clause."""
-        from pyclaude.skills.bundled_skills import get_bundled_skill
+        from pyclaude.skills.bundled import get_bundled_skill
 
         skill = get_bundled_skill('loop')
         result = skill.get_prompt_for_command('check the deploy every 20m')
@@ -357,7 +370,7 @@ class TestHooksParsing:
 
     def test_parse_every_minutes(self):
         """Parse 'every 5 minutes'."""
-        from pyclaude.skills.bundled_skills import get_bundled_skill
+        from pyclaude.skills.bundled import get_bundled_skill
 
         skill = get_bundled_skill('loop')
         result = skill.get_prompt_for_command('run tests every 5 minutes')
@@ -365,7 +378,7 @@ class TestHooksParsing:
 
     def test_default_interval(self):
         """Default interval when none specified."""
-        from pyclaude.skills.bundled_skills import get_bundled_skill
+        from pyclaude.skills.bundled import get_bundled_skill
 
         skill = get_bundled_skill('loop')
         result = skill.get_prompt_for_command('check the deploy')
@@ -377,7 +390,7 @@ class TestInitBundledSkills:
 
     def test_init_registers_skills(self):
         """Test init registers multiple skills."""
-        from pyclaude.skills.bundled_skills import (
+        from pyclaude.skills.bundled import (
             BUNDLED_SKILLS,
             init_bundled_skills,
             get_bundled_skill,
