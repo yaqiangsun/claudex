@@ -1,10 +1,10 @@
-# PyClaude
+# claudex
 
 Python implementation of Claude Code - an AI programming assistant.
 
 ## Overview
 
-PyClaude is a Python port of Claude Code, aiming to replicate the architecture and functionality of the original TypeScript project.
+claudex is a Python port of Claude Code, aiming to replicate the architecture and functionality of the original TypeScript project.
 
 ## Features
 
@@ -22,7 +22,7 @@ PyClaude is a Python port of Claude Code, aiming to replicate the architecture a
 ## Architecture
 
 ```
-pyclaude/
+claudex/
 ├── __init__.py              # Package entry
 ├── __main__.py              # CLI entry
 ├── cli_main.py              # CLI main program
@@ -88,7 +88,7 @@ pyclaude/
 ```bash
 # Clone the project
 git clone https://github.com/anthropics/claude-code.git
-cd claude-code/pyclaude
+cd claude-code/claudex
 
 # Create virtual environment
 python -m venv .venv
@@ -106,33 +106,33 @@ pip install -e .
 
 ```bash
 # View help
-python -m pyclaude --help
+python -m claudex --help
 
 # Execute single query
-python -m pyclaude "Write a hello world program"
+python -m claudex "Write a hello world program"
 
 # Specify model
-python -m pyclaude -m claude-opus-4-20250501 "Your question"
+python -m claudex -m claude-opus-4-20250501 "Your question"
 
 # Verbose output
-python -m pyclaude -v "Your question"
+python -m claudex -v "Your question"
 
 # Max turns limit
-python -m pyclaude -n 5 "Your question"
+python -m claudex -n 5 "Your question"
 ```
 
 ### REPL Interactive Mode
 
 ```bash
-python -m pyclaude --repl
+python -m claudex --repl
 ```
 
 ### Programmatic Usage
 
 ```python
 import asyncio
-from pyclaude import QueryEngine, QueryEngineConfig
-from pyclaude.tool import Tool
+from claudex import QueryEngine, QueryEngineConfig
+from claudex.tool import Tool
 
 # Create a tool
 class HelloTool(Tool):

@@ -1,10 +1,10 @@
-# PyClaude
+# claudex
 
 Claude Code 的 Python 实现 - 一个 AI 编程助手。
 
 ## 概述
 
-PyClaude 是类Claude Code 的 Python 版本，主要目的是还原原始 TypeScript 项目的架构和功能。
+claudex 是类Claude Code 的 Python 版本，主要目的是还原原始 TypeScript 项目的架构和功能。
 
 ## 特性
 
@@ -22,7 +22,7 @@ PyClaude 是类Claude Code 的 Python 版本，主要目的是还原原始 TypeS
 ## 架构
 
 ```
-pyclaude/
+claudex/
 ├── __init__.py              # 包入口
 ├── __main__.py              # CLI 入口
 ├── cli_main.py              # CLI 主程序
@@ -88,7 +88,7 @@ pyclaude/
 ```bash
 # 克隆项目
 git clone https://github.com/anthropics/claude-code.git
-cd claude-code/pyclaude
+cd claude-code/claudex
 
 # 创建虚拟环境
 python -m venv .venv
@@ -106,33 +106,33 @@ pip install -e .
 
 ```bash
 # 查看帮助
-python -m pyclaude --help
+python -m claudex --help
 
 # 执行单次查询
-python -m pyclaude "帮我写一个 hello world 程序"
+python -m claudex "帮我写一个 hello world 程序"
 
 # 指定模型
-python -m pyclaude -m claude-opus-4-20250501 "你的问题"
+python -m claudex -m claude-opus-4-20250501 "你的问题"
 
 # 详细输出
-python -m pyclaude -v "你的问题"
+python -m claudex -v "你的问题"
 
 # 最大轮数限制
-python -m pyclaude -n 5 "你的问题"
+python -m claudex -n 5 "你的问题"
 ```
 
 ### REPL 交互模式
 
 ```bash
-python -m pyclaude --repl
+python -m claudex --repl
 ```
 
 ### 编程使用
 
 ```python
 import asyncio
-from pyclaude import QueryEngine, QueryEngineConfig
-from pyclaude.tool import Tool
+from claudex import QueryEngine, QueryEngineConfig
+from claudex.tool import Tool
 
 # 创建工具
 class HelloTool(Tool):

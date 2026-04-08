@@ -1,7 +1,7 @@
 [project]
-name = "pyclaude"
+name = "claudex"
 version = "0.1.0"
-description = "Claude Code - AI coding assistant in Python"
+description = "claudex - AI coding assistant in Python"
 readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [
@@ -28,7 +28,7 @@ dev = [
 ]
 
 [project.scripts]
-pyclaude = "pyclaude.main:main"
+claudex = "claudex.main:main"
 
 [build-system]
 requires = ["hatchling"]
