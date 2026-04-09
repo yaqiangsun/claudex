@@ -13,7 +13,11 @@ docs/claude/
 ├── 02-core-modules.md   # 核心模块分析
 ├── 03-bridge-module.md  # Bridge 桥接模块
 ├── 04-cli-commands.md   # CLI 和命令系统
-└── 05-hooks-services.md # Hooks 和 Services
+├── 05-hooks-services.md # Hooks 和 Services
+├── 06-tools-implementation.md   # 内置工具实现
+├── 07-utils-library.md  # 工具函数库
+├── 08-constants.md      # 常量定义
+└── 09-startup-flow.md   # 启动流程分析
 ```
 
 ---
@@ -147,6 +151,114 @@ docs/claude/
 
 ---
 
+### 第六层：内置工具实现
+
+📄 **[06-tools-implementation.md](06-tools-implementation.md)**
+
+#### 工具分类（45 个工具目录）
+- 文件操作: FileRead, FileWrite, FileEdit, Glob, Grep
+- 命令执行: Bash, PowerShell
+- Agent 管理: AgentTool
+- 任务管理: TaskCreate, TaskGet, TaskList, TaskOutput, TaskStop, TaskUpdate
+- Web 功能: WebFetch, WebSearch
+- 其他: Config, TodoWrite, Skill, LSP, MCP 等
+
+#### 工具构建模式
+- 使用 `buildTool()` 函数构建
+- 工具目录标准结构 (ToolName.tsx, prompt.ts, constants.ts, utils.ts, UI.tsx)
+
+#### 核心工具详解
+- **BashTool**: Shell 命令执行，包含完整的权限和安全机制
+- **FileReadTool**: 文件读取，支持图像、PDF、Jupyter Notebook
+- **FileEditTool**: 文件编辑，支持原地编辑和正则替换
+- **AgentTool**: 子 Agent 创建和管理
+
+#### 工具能力系统
+- 并发安全 (isConcurrencySafe)
+- 只读检测 (isReadOnly)
+- 破坏性操作 (isDestructive)
+- 权限检查 (checkPermissions)
+
+#### 工具渲染系统
+- 工具使用消息渲染
+- 工具结果消息渲染
+- 进度消息渲染
+
+---
+
+### 第七层：工具函数库
+
+📄 **[07-utils-library.md](07-utils-library.md)**
+
+#### 统计信息
+- 文件数量: 329 个 TypeScript 文件
+- 子目录: 31 个
+
+#### 核心子模块
+- **bash/**: Bash 命令解析 (parser, ast, commands)
+- **permissions/**: 权限系统 (PermissionResult, filesystem, shellRuleMatching)
+- **git/**: Git 操作 (commit, push, diff, reset)
+- **messages/**: 消息处理
+- **model/**: 模型相关
+- **task/**: 任务管理
+
+#### 重要工具函数
+- 文件操作: readFile, writeTextContent, expandPath
+- 错误处理: ClaudeError, ShellError, isENOENT
+- 环境检测: isEnvTruthy, isBareMode, getCwd
+- 认证: auth, authPortable
+- 设置: settingsSchema, getGlobalConfig
+
+---
+
+### 第八层：常量定义
+
+📄 **[08-constants.md](08-constants.md)**
+
+#### 常量文件 (22 个)
+- **apiLimits.ts**: Anthropic API 限制（图像、PDF、媒体）
+- **toolLimits.ts**: 工具结果大小限制
+- **tools.ts**: 允许/禁止工具列表
+- **betas.ts**: Beta 功能开关
+- **system.ts**: 应用信息、超时
+- **oauth.ts**: OAuth 配置
+- **outputStyles.ts**: 输出样式
+- **keys.ts**: 键盘快捷键
+- **prompts.ts**: 系统提示词 (54KB)
+
+#### 关键常量
+- API 限制: IMAGE_MAX_WIDTH, PDF_MAX_PAGES, API_MAX_MEDIA_PER_REQUEST
+- 工具限制: DEFAULT_MAX_RESULT_SIZE_CHARS, MAX_TOOL_RESULT_TOKENS
+- 系统: APP_NAME, DEFAULT_TIMEOUT_MS
+
+---
+
+### 第九层：启动流程
+
+📄 **[09-startup-flow.md](09-startup-flow.md)**
+
+#### main.tsx (入口)
+- 顶层副作用（性能分析、MDM 读取、Keychain 预取）
+- CLI 参数解析（Commander.js）
+- 主要命令结构
+
+#### setup.ts (初始化)
+- 版本检查（Node.js >= 18）
+- UDS 消息服务器启动
+- 队友模式快照
+- 终端备份恢复
+- Hooks 配置快照
+- Worktree 创建（可选）
+- 预加载命令和插件
+- 分析服务初始化
+
+#### launchRepl 流程
+- 创建 Ink 应用
+- 渲染应用
+- 处理退出
+
+---
+
 ## 模块依赖关系图
 
 ```
@@ -188,23 +300,34 @@ docs/claude/
 |------------|------|-----------------|
 | `QueryEngine` | 02-core-modules.md | `class QueryEngine` |
 | `QueryEngineConfig` | 02-core-modules.md | `@dataclass` |
-| `Tool` | 02-core-modules.md | `Protocol` |
+| `Tool` | 02-core-modules.md | `Protocol` / `ABC` |
 | `TaskType` | 02-core-modules.md | `Enum` |
 | `Message` | 02-core-modules.md | `dataclass` |
 | `BridgeApiClient` | 03-bridge-module.md | `class` |
 | `SessionHandle` | 03-bridge-module.md | `class` |
-| `Transport` | 04-cli-commands.md | `Protocol` |
-| `Command` | 04-cli-commands.md | `Protocol` |
+| `Transport` | 04-cli-commands.md | `Protocol` / `ABC` |
+| `Command` | 04-cli-commands.md | `Protocol` / `ABC` |
 | `Store<T>` | 05-hooks-services.md | `Generic[T]` |
 | `AppState` | 05-hooks-services.md | `@dataclass` |
+| `BashTool` | 06-tools-implementation.md | `class Tool` |
+| `ToolRegistry` | 06-tools-implementation.md | `class ToolRegistry` |
+| `PermissionResult` | 07-utils-library.md | `dataclass` |
+| API 限制常量 | 08-constants.md | `const` 变量 |
+| `setup()` | 09-startup-flow.md | `async def setup()` |
 
 ---
 
 ## 建议阅读顺序
 
-1. **初学者**: 01 → 02 → 03 → 04 → 05
+1. **初学者**: 01 → 02 → 06 → 03 → 04 → 05 → 07 → 08 → 09
 2. **有经验者**: 直接查看感兴趣的部分
-3. **Python 实现**: 重点参考 02-core-modules.md 和模块依赖关系
+3. **Python 实现**: 重点参考 02-core-modules.md、06-tools-implementation.md 和模块依赖关系
+
+> **新增文档说明**:
+> - 06: 工具实现（45 个内置工具）
+> - 07: 工具函数库（329 个工具函数）
+> - 08: 常量定义（22 个常量文件）
+> - 09: 启动流程（main.tsx + setup.ts）
 
 ---
 
@@ -218,5 +341,5 @@ docs/claude/
 
 ---
 
-*文档版本: 1.0*
-*最后更新: 2026-04-08*
+*文档版本: 1.1*
+*最后更新: 2026-04-09*
