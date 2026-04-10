@@ -17,7 +17,8 @@ docs/claude/
 ├── 06-tools-implementation.md   # 内置工具实现
 ├── 07-utils-library.md  # 工具函数库
 ├── 08-constants.md      # 常量定义
-└── 09-startup-flow.md   # 启动流程分析
+├── 09-startup-flow.md   # 启动流程分析
+└── 10-skills-system.md  # 技能系统
 ```
 
 ---
@@ -259,6 +260,54 @@ docs/claude/
 
 ---
 
+### 第十层：技能系统
+
+📄 **[10-skills-system.md](10-skills-system.md)**
+
+#### 技能类型
+- **bundled**: CLI 内置技能 (15+ 个)
+- **skills/**: 用户/项目技能目录
+- **commands/**: 传统命令目录 (兼容)
+- **mcp**: MCP 服务器技能
+- **plugin**: 插件技能
+
+#### 核心内置技能
+- **debug**: 调试当前会话
+- **simplify**: 代码审查和清理（启动3个并行Agent）
+- **verify**: 验证代码
+- **loremIpsum**: 生成占位符
+- **skillify**: 将命令转为技能
+- **remember**: 记住信息
+- 条件加载技能 (dream, hunter, loop 等)
+
+#### 技能注册机制
+- `registerBundledSkill()` 程序化注册
+- Frontmatter 解析 (SKILL.md)
+- 动态技能发现 (条件触发)
+- 变量替换 (\${1}, \${CLAUDE_SKILL_DIR})
+
+#### main.tsx (入口)
+- 顶层副作用（性能分析、MDM 读取、Keychain 预取）
+- CLI 参数解析（Commander.js）
+- 主要命令结构
+
+#### setup.ts (初始化)
+- 版本检查（Node.js >= 18）
+- UDS 消息服务器启动
+- 队友模式快照
+- 终端备份恢复
+- Hooks 配置快照
+- Worktree 创建（可选）
+- 预加载命令和插件
+- 分析服务初始化
+
+#### launchRepl 流程
+- 创建 Ink 应用
+- 渲染应用
+- 处理退出
+
+---
+
 ## 模块依赖关系图
 
 ```
@@ -290,6 +339,12 @@ docs/claude/
 │                      05-hooks-services.md                        │
 │              Hooks (90+)  │  Services (50+)  │  State            │
 └──────────────────────────────────────────────────────────────────┘
+                             │
+                             ▼
+┌──────────────────────────────────────────────────────────────────┐
+│                      10-skills-system.md                         │
+│       内置技能 (15+)  │  磁盘技能加载  │  动态发现                │
+└──────────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -314,20 +369,24 @@ docs/claude/
 | `PermissionResult` | 07-utils-library.md | `dataclass` |
 | API 限制常量 | 08-constants.md | `const` 变量 |
 | `setup()` | 09-startup-flow.md | `async def setup()` |
+| `BundledSkillDefinition` | 10-skills-system.md | `dataclass` |
+| `Skill` | 10-skills-system.md | `ABC` |
+| `registerBundledSkill` | 10-skills-system.md | `def register_bundled_skill()` |
 
 ---
 
 ## 建议阅读顺序
 
-1. **初学者**: 01 → 02 → 06 → 03 → 04 → 05 → 07 → 08 → 09
+1. **初学者**: 01 → 02 → 06 → 10 → 03 → 04 → 05 → 07 → 08 → 09
 2. **有经验者**: 直接查看感兴趣的部分
-3. **Python 实现**: 重点参考 02-core-modules.md、06-tools-implementation.md 和模块依赖关系
+3. **Python 实现**: 重点参考 02-core-modules.md、06-tools-implementation.md、10-skills-system.md 和模块依赖关系
 
 > **新增文档说明**:
 > - 06: 工具实现（45 个内置工具）
 > - 07: 工具函数库（329 个工具函数）
 > - 08: 常量定义（22 个常量文件）
 > - 09: 启动流程（main.tsx + setup.ts）
+> - 10: 技能系统（15+ 内置技能、磁盘加载、动态发现）
 
 ---
 
