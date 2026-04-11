@@ -18,7 +18,10 @@ docs/claude/
 ├── 07-utils-library.md  # 工具函数库
 ├── 08-constants.md      # 常量定义
 ├── 09-startup-flow.md   # 启动流程分析
-└── 10-skills-system.md  # 技能系统
+├── 10-skills-system.md  # 技能系统
+├── 11-components.md     # React 组件系统
+├── 12-context-state.md  # Context 和 State
+└── 13-additional-modules.md  # 其他模块 (Ink/Buddy/Coordinator)
 ```
 
 ---
@@ -372,14 +375,20 @@ docs/claude/
 | `BundledSkillDefinition` | 10-skills-system.md | `dataclass` |
 | `Skill` | 10-skills-system.md | `ABC` |
 | `registerBundledSkill` | 10-skills-system.md | `def register_bundled_skill()` |
+| `InkComponent` | 11-components.md | `ABC` |
+| `MessageRenderer` | 11-components.md | `class` |
+| `StatsStore` | 12-context-state.md | `class` |
+| `NotificationManager` | 12-context-state.md | `class` |
+| `ClaudePlugin` | 12-context-state.md | `Protocol` |
+| `Screen` | 13-additional-modules.md | `class` |
 
 ---
 
 ## 建议阅读顺序
 
-1. **初学者**: 01 → 02 → 06 → 10 → 03 → 04 → 05 → 07 → 08 → 09
+1. **初学者**: 01 → 02 → 06 → 10 → 11 → 03 → 04 → 05 → 07 → 08 → 09 → 12 → 13
 2. **有经验者**: 直接查看感兴趣的部分
-3. **Python 实现**: 重点参考 02-core-modules.md、06-tools-implementation.md、10-skills-system.md 和模块依赖关系
+3. **Python 实现**: 重点参考 02-core-modules.md、06-tools-implementation.md、10-skills-system.md、11-components.md 和模块依赖关系
 
 > **新增文档说明**:
 > - 06: 工具实现（45 个内置工具）
@@ -387,6 +396,9 @@ docs/claude/
 > - 08: 常量定义（22 个常量文件）
 > - 09: 启动流程（main.tsx + setup.ts）
 > - 10: 技能系统（15+ 内置技能、磁盘加载、动态发现）
+> - 11: React 组件系统（144 个组件）
+> - 12: Context 和 State（Provider 模式、统计、通知）
+> - 13: 其他模块（Ink 框架、Buddy 队友、Coordinator 协调者）
 
 ---
 
@@ -400,5 +412,5 @@ docs/claude/
 
 ---
 
-*文档版本: 1.1*
-*最后更新: 2026-04-09*
+*文档版本: 1.2*
+*最后更新: 2026-04-11*
