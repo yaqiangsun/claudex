@@ -22,7 +22,8 @@ docs/claude/
 ├── 11-components.md     # React 组件系统
 ├── 12-context-state.md  # Context 和 State
 ├── 13-additional-modules.md  # 其他模块 (Ink/Buddy/Coordinator)
-└── 14-input-system.md   # 输入系统 (Keybindings/Vim/Server)
+├── 14-input-system.md   # 输入系统 (Keybindings/Vim/Server)
+└── 15-remaining-modules.md  # 剩余模块 (Bootstrap/Memdir/Remote/Types)
 ```
 
 ---
@@ -387,14 +388,20 @@ docs/claude/
 | `VimEngine` | 14-input-system.md | `class` |
 | `ServerConfig` | 14-input-system.md | `dataclass` |
 | `SessionInfo` | 14-input-system.md | `dataclass` |
+| `Memory` | 15-remaining-modules.md | `dataclass` |
+| `MemoryManager` | 15-remaining-modules.md | `class` |
+| `RemoteSession` | 15-remaining-modules.md | `dataclass` |
+| `PromptCommand` | 15-remaining-modules.md | `dataclass` |
+| `LocalCommand` | 15-remaining-modules.md | `dataclass` |
+| `ChannelEntry` | 15-remaining-modules.md | `dataclass` |
 
 ---
 
 ## 建议阅读顺序
 
-1. **初学者**: 01 → 02 → 06 → 10 → 11 → 14 → 03 → 04 → 05 → 07 → 08 → 09 → 12 → 13
+1. **初学者**: 01 → 02 → 06 → 10 → 11 → 14 → 15 → 03 → 04 → 05 → 07 → 08 → 09 → 12 → 13
 2. **有经验者**: 直接查看感兴趣的部分
-3. **Python 实现**: 重点参考 02-core-modules.md、06-tools-implementation.md、10-skills-system.md、11-components.md、14-input-system.md 和模块依赖关系
+3. **Python 实现**: 重点参考 02-core-modules.md、06-tools-implementation.md、10-skills-system.md、11-components.md、14-input-system.md、15-remaining-modules.md 和模块依赖关系
 
 > **新增文档说明**:
 > - 06: 工具实现（45 个内置工具）
@@ -406,6 +413,7 @@ docs/claude/
 > - 12: Context 和 State（Provider 模式、统计、通知）
 > - 13: 其他模块（Ink 框架、Buddy 队友、Coordinator 协调者）
 > - 14: 输入系统（Keybindings 快捷键、Vim 模式、Server 直连）
+> - 15: 剩余模块（Bootstrap、Memdir 记忆、Remote 远程、Types 类型定义）
 
 ---
 
@@ -419,5 +427,5 @@ docs/claude/
 
 ---
 
-*文档版本: 1.3*
+*文档版本: 1.4*
 *最后更新: 2026-04-14*
