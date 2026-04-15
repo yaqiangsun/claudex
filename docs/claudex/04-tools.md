@@ -677,11 +677,13 @@ class AgentTool(BaseTool):
 | `BashSecurityValidator` | `class BashSecurityValidator` | `pyclaude/tools/permissions/security.py` |
 | `SandboxManager` | `class SandboxManager` | `pyclaude/tools/permissions/sandbox.py` |
 | `ReadOnlyDetector` | `class ReadOnlyDetector` | `pyclaude/tools/permissions/readonly.py` |
+| `PermissionChecker` | `class PermissionChecker` | `pyclaude/tools/permissions.py` |
 | `FileReadTool` | `class FileReadTool` | `pyclaude/tools/file.py` |
 | `FileEditTool` | `class FileEditTool` | `pyclaude/tools/file_edit.py` |
 | `GlobTool` | `class GlobTool` | `pyclaude/tools/glob.py` |
 | `GrepTool` | `class GrepTool` | `pyclaude/tools/grep.py` |
 | `AgentTool` | `class AgentTool` | `pyclaude/tools/agent.py` |
+| `WebFetchTool` | `class WebFetchTool` | `pyclaude/tools/web.py` |
 | `ToolRegistry` | `class ToolRegistry` | `pyclaude/tools/registry.py` |
 
 ## 4.6 全部工具列表
