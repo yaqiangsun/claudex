@@ -30,7 +30,7 @@
 - [13-工具库](./13-utils.md) - 330+ 工具函数
 - [14-常量定义](./14-constants.md) - API 限制、提示词
 - [15-启动流程](./15-startup.md) - 初始化流程
-- [16-其他模块](./16-additional.md) - Buddy、Coordinator、Memdir
+- [16-内存系统与扩展模块](./16-additional.md) - 自动记忆、团队记忆、会话记忆、Agent内存、Buddy、Coordinator、Remote
 
 ### 开发规范
 - [17-代码规范](./17-coding-standards.md) - 项目结构、代码风格、测试规范、示例代码
@@ -51,8 +51,11 @@
 | commands/ | `pyclaude/commands/` |
 | hooks/ | `pyclaude/hooks/` |
 | services/ | `pyclaude/services/` |
+| services/mcp/ | `pyclaude/services/mcp/` |
 | tools/ | `pyclaude/tools/` |
+| tools/BashTool/ | `pyclaude/tools/bash.py` + `pyclaude/tools/permissions/` |
 | skills/ | `pyclaude/skills/` |
+| memdir/ | `pyclaude/memdir/` |
 | state/ | `pyclaude/state/` |
 | utils/ | `pyclaude/utils/` |
 | constants/ | `pyclaude/constants/` |
